@@ -9,12 +9,12 @@
 
 <a name="english"></a>
 ## 📖 Overview
-Gexus is an innovative, Gemini-inspired web application that empowers users to generate, edit, and manage playable HTML5 games instantly using Google's Gemini AI models. Simply describe your game idea, and watch the AI build a playable "White Box" prototype in seconds.
+GEXUS (Local Version) is a game development tool integrated with generative AI (using your own API), designed to standardize and simplify the game development workflow. You can quickly generate, edit, and manage playable games through natural language descriptions.
 
 ## ✨ Features
-*   🤖 **AI-Powered Generation**: Turn text prompts into playable prototypes using Gemini 3 Pro/Flash.
+*   🤖 **AI-Powered Generation**: Transform your ideas into playable game prototypes using generative AI (with the model of your choice). Multi-modal support included.
 *   🎨 **Gemini-Style UI**: Clean, responsive dark-mode interface (`slate-950`) with a collapsible sidebar.
-*   🛠️ **Studio Editor**: Inspect generated code, manage game assets, tweak parameters, and iterate on your game's logic.
+*   🛠️ **Studio Editor**: Minimalist operation. Iterate on gameplay using natural language; inspect and edit generated code; manage game assets and adjust parameters; assisted by Copilot.
 *   🌍 **Bilingual Support**: Fully supports English and Chinese (Simplified).
 *   🔑 **Bring Your Own Key (BYOK)**: Securely store your Gemini API key locally in the browser.
 *   💾 **Local Persistence**: All projects, versions, and settings are saved locally via `localStorage`.
@@ -47,7 +47,10 @@ Gexus is an innovative, Gemini-inspired web application that empowers users to g
 4. **Complete Game Development Workflow:**
    * **Create New:** On the "New Project" screen, select an AI model (default is **Gemini 3.0 Pro**) -> Enter your game idea.
    * **Auto-Transition:** Once the AI finishes generating, a new project is created and you are automatically redirected to the project's **Studio** interface.
-   * **Iterate in Studio:** In the Studio interface, select an AI model (default is **Gemini 3.0 Pro**) -> Directly enter your ideas in the **Director** tab to iterate on the game; read/edit the code in the **Code** tab -> Configure game assets and adjust parameters in the **Inspector** tab -> **Export** your game.
+   * **Iterate in Studio:** In the Studio interface, select an AI model (default is **Gemini 3.0 Pro**) 
+     -> Directly enter your ideas in the **Director** tab to iterate on the game; read/edit the code in the **Code** tab 
+     -> Configure game assets and adjust parameters in the **Inspector** tab 
+     -> **Export** your game.
 
 ## 🛠️ Tech Stack
 *   **Frontend**: React, TypeScript, Vite
@@ -59,12 +62,12 @@ Gexus is an innovative, Gemini-inspired web application that empowers users to g
 
 <a name="中文说明"></a>
 ## 📖 项目简介 (Overview)
-Gexus 是一款受 Gemini 界面启发的创新型 Web 应用，用户可以通过 Google 的 Gemini AI 模型，通过自然语言描述瞬间生成、编辑和管理可玩的 HTML5 网页游戏。
+GEXUS（本地运行版）是一款集成生成型AI的游戏开发工具（使用您自己的 API），可标准化并简化游戏开发工作流。您可以通过自然语言描述来快速生成、编辑和管理可玩的游戏。
 
 ## ✨ 核心特性 (Features)
-*   🤖 **AI 驱动生成**: 使用 Gemini 3 Pro/Flash 模型，将文本提示转化为可玩的“白盒”原型。
+*   🤖 **AI 驱动生成**: 使用生成型AI（模型由您选择），将您的想法转化为可玩的游戏原型。支持多模态。
 *   🎨 **Gemini 风格 UI**: 干净、响应式的深色模式界面，配备可折叠侧边栏，提供沉浸式体验。
-*   🛠️ **Studio 工作室**: 检查生成的代码，管理游戏素材，调整参数，并迭代游戏逻辑。
+*   🛠️ **Studio 工作室**: 极简主义操作。用自然语言迭代游戏玩法；检查和编辑生成的代码；管理游戏素材，调整参数；Copilot辅助开发。
 *   🌍 **双语支持**: 原生支持英文和简体中文。
 *   🔑 **自带 API Key (BYOK)**: 在浏览器本地安全地存储您的 Gemini API Key。
 *   💾 **本地存储**: 所有项目、版本历史和设置均通过 `localStorage` 安全保存在本地，保护隐私。
@@ -97,7 +100,10 @@ Gexus 是一款受 Gemini 界面启发的创新型 Web 应用，用户可以通�
 4. **完整的游戏开发工作流：**
    * 在 **Create New (创建新项目)** 界面选择 AI 模型（默认 **Gemini 3.0 Pro**） -> 输入您的想法。
    * AI 生成完成后会自动创建新项目，并跳转至该项目的 **Studio (工作室)** 界面。
-   * 在 **Studio** 界面选择 AI 模型（默认 **Gemini 3.0 Pro**） -> 在 **导演 (Director)** 栏直接输入您的想法实现迭代；在 **代码 (Code)** 栏阅读/编辑代码 -> 在 **检查器 (Inspector)** 栏配置游戏素材/调整游戏参数 -> **导出 (Export)** 游戏。
+   * 在 **Studio** 界面选择 AI 模型（默认 **Gemini 3.0 Pro**） 
+     -> 在 **导演 (Director)** 栏直接输入您的想法实现迭代；在 **代码 (Code)** 栏阅读/编辑代码 
+     -> 在 **检查器 (Inspector)** 栏配置游戏素材/调整游戏参数 
+     -> **导出 (Export)** 游戏。
 
 ## 📄 License
 This project is licensed under the MIT License.
