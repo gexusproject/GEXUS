@@ -55,6 +55,8 @@ interface StudioProps {
   currentUser: User | null;
   onBusyChange?: (isBusy: boolean) => void; 
   onBack?: () => void;
+  dashboardTrigger?: number;
+  onProjectChange?: (projectId: string | null) => void;
 }
 
 type WorkbenchTab = 'director' | 'code' | 'inspector';
@@ -583,7 +585,7 @@ const NumberSlotInput: React.FC<{ slot: NumberSlot, onUpdate: (name: string, val
 };
 
 
-const Studio: React.FC<StudioProps> = ({ games, onUpdateGame, onDeleteGame, onCreateNew, onGameImported, onEditingChange, libraryAssets, language, projectToLoad, onProjectLoaded, currentUser, onBusyChange, onBack }) => {
+const Studio: React.FC<StudioProps> = ({ games, onUpdateGame, onDeleteGame, onCreateNew, onGameImported, onEditingChange, libraryAssets, language, projectToLoad, onProjectLoaded, currentUser, onBusyChange, onBack, dashboardTrigger, onProjectChange }) => {
   const t = TEXT[language] || TEXT['en'];
   const [selectedProject, setSelectedProject] = useState<Game | null>(null);
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
@@ -602,6 +604,7 @@ const Studio: React.FC<StudioProps> = ({ games, onUpdateGame, onDeleteGame, onCr
   const [isModifying, setIsModifying] = useState(false);
   
   const [isPublishModalOpen, setIsPublishModalOpen] = useState(false);
+  const [isEditInfoModalOpen, setIsEditInfoModalOpen] = useState(false);
   const [publishStep, setPublishStep] = useState<'config' | 'cover_editor' | 'generating_agent' | 'success'>('config');
   const [enableAutoplay, setEnableAutoplay] = useState(true);
   const [publishDraft, setPublishDraft] = useState<Partial<Game>>({});
@@ -619,9 +622,9 @@ const Studio: React.FC<StudioProps> = ({ games, onUpdateGame, onDeleteGame, onCr
   const [isFromDevKit, setIsFromDevKit] = useState(false);
   const [studioModel, setStudioModel] = useState(() => {
       if (typeof window !== 'undefined') {
-          return localStorage.getItem('studio_model') || 'gemini-2.5-flash';
+          return localStorage.getItem('studio_model') || 'gemini-3-pro-preview';
       }
-      return 'gemini-2.5-flash';
+      return 'gemini-3-pro-preview';
   });
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
 
@@ -711,6 +714,18 @@ const Studio: React.FC<StudioProps> = ({ games, onUpdateGame, onDeleteGame, onCr
   useEffect(() => { onEditingChange?.(!!selectedProject); }, [selectedProject, onEditingChange]);
   
   useEffect(() => {
+    if (dashboardTrigger && dashboardTrigger > 0) {
+        setSelectedProject(null);
+    }
+  }, [dashboardTrigger]);
+
+  useEffect(() => {
+    if (onProjectChange) {
+        onProjectChange(selectedProject?.id || null);
+    }
+  }, [selectedProject?.id, onProjectChange]);
+
+  useEffect(() => {
       onBusyChange?.(isModifying || aiState === 'thinking' || isPublishingBusy);
   }, [isModifying, aiState, isPublishingBusy, onBusyChange]);
 
@@ -796,7 +811,7 @@ const Studio: React.FC<StudioProps> = ({ games, onUpdateGame, onDeleteGame, onCr
   useEffect(() => { if (previewAsset) { setPreviewZoom(1); setPreviewOffset({x: 0, y: 0}); } }, [previewAsset]);
   useEffect(() => { const handleClickOutside = (event: MouseEvent) => { if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) { setIsExportMenuOpen(false); } }; if (isExportMenuOpen) { document.addEventListener('mousedown', handleClickOutside); } else { document.removeEventListener('mousedown', handleClickOutside); } return () => document.removeEventListener('mousedown', handleClickOutside); }, [isExportMenuOpen]);
   useEffect(() => { setDevKitTasks({}); }, [selectedProject?.id, selectedProject?.code]);
-  useEffect(() => { if (isPublishModalOpen && selectedProject) { setPublishDraft({ title: selectedProject.title, description: selectedProject.description, versionLabel: selectedProject.versionLabel, thumbnailUrl: selectedProject.thumbnailUrl }); } }, [isPublishModalOpen, selectedProject]);
+  useEffect(() => { if ((isPublishModalOpen || isEditInfoModalOpen) && selectedProject) { setPublishDraft({ title: selectedProject.title, description: selectedProject.description, versionLabel: selectedProject.versionLabel, thumbnailUrl: selectedProject.thumbnailUrl }); } }, [isPublishModalOpen, isEditInfoModalOpen, selectedProject]);
   
   const loadTasksForStage = async (stageId: string) => { if (!selectedProject) return; setIsLoadingTasks(true); try { const tasks = await generateNextSteps(selectedProject.code, stageId, language); setDevKitTasks(prev => ({ ...prev, [stageId]: tasks })); } catch (e) { console.error("Failed to load dev tasks", e); } finally { setIsLoadingTasks(false); } };
   const assetSlots = useMemo((): AssetSlot[] => { const jsCode = editorContent.js; const slots: AssetSlot[] = []; const regex = /(const|let|var)\s+(\w+)\s*=\s*['"](.*?)['"]\s*;?\s*\/\/\s*@asset\(([^)]+)\)/g; let match; while ((match = regex.exec(jsCode)) !== null) { const val = match[3]; const isColor = /^(#|rgb|hsl)/i.test(val); if (!isColor) { slots.push({ variableName: match[2], currentValue: val, displayName: match[4] }); } } return slots; }, [editorContent.js]);
@@ -1299,6 +1314,27 @@ const Studio: React.FC<StudioProps> = ({ games, onUpdateGame, onDeleteGame, onCr
   
   const handleRestoreVersion = (versionIndex: number) => { if (!selectedProject || !selectedProject.history) return; const targetVersion = selectedProject.history[versionIndex]; if (!targetVersion) return; let codeToLoad = targetVersion.code; let activeId = undefined; if (targetVersion.minorVersions && targetVersion.minorVersions.length > 0) { if (targetVersion.activeMinorVersionId) { const snap = targetVersion.minorVersions.find(m => m.id === targetVersion.activeMinorVersionId); if (snap) { codeToLoad = snap.code; activeId = snap.id; } } if (!activeId) { const latest = targetVersion.minorVersions[targetVersion.minorVersions.length - 1]; codeToLoad = latest.code; activeId = latest.id; } } const updatedHistory = [...selectedProject.history]; updatedHistory[versionIndex] = { ...targetVersion, activeMinorVersionId: activeId }; const updatedGame: Game = { ...selectedProject, code: codeToLoad, description: targetVersion.description || selectedProject.description, instructions: targetVersion.instructions || selectedProject.instructions, history: updatedHistory, currentVersionIndex: versionIndex }; setSelectedProject(updatedGame); setIsFromDevKit(false); setModificationPrompt(''); const { html, css, js } = extractFiles(codeToLoad); const content = { html, css, js }; setEditorContent(content); setInitialContent(content); setHistory([content]); setHistoryIndex(0); };
 
+  const handleSaveGameInfo = async () => {
+    if (!selectedProject) return;
+    const updatedGame = {
+      ...selectedProject,
+      title: publishDraft.title ?? selectedProject.title,
+      description: publishDraft.description ?? selectedProject.description,
+      versionLabel: publishDraft.versionLabel ?? selectedProject.versionLabel,
+      thumbnailUrl: publishDraft.thumbnailUrl ?? selectedProject.thumbnailUrl
+    };
+    
+    setSelectedProject(updatedGame);
+    await apiUpdateGameMetadata(updatedGame.id, {
+      title: updatedGame.title,
+      description: updatedGame.description,
+      versionLabel: updatedGame.versionLabel,
+      thumbnailUrl: updatedGame.thumbnailUrl
+    });
+    onUpdateGame(updatedGame, false);
+    setIsEditInfoModalOpen(false);
+  };
+
   const handlePublishFlow = async () => {
     if (!selectedProject) return;
     const gameToPublish = { ...selectedProject, ...publishDraft };
@@ -1506,35 +1542,6 @@ const Studio: React.FC<StudioProps> = ({ games, onUpdateGame, onDeleteGame, onCr
                     <p className="text-slate-400 text-xs mt-1">{games.length} {t.projectsActive}</p>
                 </div>
                  <div className="flex gap-3">
-                    <div className="relative">
-                        <button 
-                            onClick={() => setIsModelMenuOpen(!isModelMenuOpen)}
-                            className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-xs font-bold text-slate-300 transition-colors h-full"
-                        >
-                            <Cpu size={14} className="text-purple-400"/>
-                            <span className="hidden sm:inline">{MODELS.find(m => m.id === studioModel)?.label}</span>
-                            <span className="sm:hidden">{MODELS.find(m => m.id === studioModel)?.label.replace('Gemini ', '')}</span>
-                            <ChevronDown size={12} />
-                        </button>
-                        {isModelMenuOpen && (
-                            <>
-                                <div className="fixed inset-0 z-20" onClick={() => setIsModelMenuOpen(false)}></div>
-                                <div className="absolute right-0 top-full mt-2 w-48 bg-[#1e1e2e] border border-white/10 rounded-xl shadow-xl z-30 overflow-hidden py-1 animate-in fade-in zoom-in-95 origin-top-right">
-                                    {MODELS.map(m => (
-                                        <button
-                                            key={m.id}
-                                            onClick={() => handleStudioModelSelect(m.id)}
-                                            className={`w-full text-left px-4 py-2.5 text-[10px] font-bold hover:bg-white/5 transition-colors flex items-center justify-between ${studioModel === m.id ? 'text-purple-400 bg-purple-500/10' : 'text-slate-400'}`}
-                                        >
-                                            {m.label}
-                                            {studioModel === m.id && <Check size={12} />}
-                                        </button>
-                                    ))}
-                                </div>
-                            </>
-                        )}
-                    </div>
-
                     <input type="file" ref={importFileInputRef} className="hidden" accept=".html,.htm" onChange={handleImportFile} />
                     
                     <div className="relative">
@@ -1646,14 +1653,50 @@ const Studio: React.FC<StudioProps> = ({ games, onUpdateGame, onDeleteGame, onCr
             <button 
                 disabled={isModifying || aiState === 'thinking'} 
                 onClick={() => {
-                    if (onBack) onBack();
-                    else setSelectedProject(null);
+                    setIsEditInfoModalOpen(true);
                 }} 
-                className={`p-1.5 -ml-2 rounded-full transition-colors ${isModifying || aiState === 'thinking' ? 'opacity-30 cursor-not-allowed' : 'hover:bg-white/10 text-slate-400 hover:text-white'}`}
+                className={`w-8 h-8 rounded-lg overflow-hidden shrink-0 border border-white/10 relative flex items-center justify-center group transition-all ${isModifying || aiState === 'thinking' ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:border-purple-500/50'}`}
             >
-                <ArrowLeft size={20}/>
+                {selectedProject.thumbnailUrl ? (
+                    <img src={selectedProject.thumbnailUrl} className="w-full h-full object-cover" />
+                ) : (
+                    <Gamepad2 size={16} className="text-slate-400 group-hover:text-purple-400 transition-colors"/>
+                )}
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <PenTool size={12} className="text-white"/>
+                </div>
             </button>
             <div className="flex-1 min-w-0"><h2 className="text-sm font-bold text-white truncate">{selectedProject.title}</h2><div className="flex items-center gap-2"><p className="text-[10px] text-emerald-500 font-mono">v{currentVersionNumber}.0</p></div></div>
+            
+            <div className="relative">
+                <button 
+                    onClick={() => setIsModelMenuOpen(!isModelMenuOpen)}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-xs font-bold text-slate-300 transition-colors"
+                >
+                    <Cpu size={14} className="text-purple-400"/>
+                    <span className="hidden sm:inline">{MODELS.find(m => m.id === studioModel)?.label}</span>
+                    <span className="sm:hidden">{MODELS.find(m => m.id === studioModel)?.label.replace('Gemini ', '')}</span>
+                    <ChevronDown size={12} />
+                </button>
+                {isModelMenuOpen && (
+                    <>
+                        <div className="fixed inset-0 z-20" onClick={() => setIsModelMenuOpen(false)}></div>
+                        <div className="absolute right-0 top-full mt-2 w-48 bg-[#1e1e2e] border border-white/10 rounded-xl shadow-xl z-30 overflow-hidden py-1 animate-in fade-in zoom-in-95 origin-top-right">
+                            {MODELS.map(m => (
+                                <button
+                                    key={m.id}
+                                    onClick={() => handleStudioModelSelect(m.id)}
+                                    className={`w-full text-left px-4 py-2.5 text-[10px] font-bold hover:bg-white/5 transition-colors flex items-center justify-between ${studioModel === m.id ? 'text-purple-400 bg-purple-500/10' : 'text-slate-400'}`}
+                                >
+                                    {m.label}
+                                    {studioModel === m.id && <Check size={12} />}
+                                </button>
+                            ))}
+                        </div>
+                    </>
+                )}
+            </div>
+
             <button onClick={() => setIsPanMode(!isPanMode)} className={`p-2 rounded-full transition-colors ${isPanMode ? 'bg-purple-600 text-white shadow-[0_0_10px_rgba(147,51,234,0.5)]' : 'text-slate-400 hover:bg-white/10 hover:text-white'}`} title={t.panTool}><Hand size={18} /></button>
             <div className="relative"><button onClick={() => setIsSettingsOpen(!isSettingsOpen)} className={`p-2 rounded-full hover:bg-white/10 ${isSettingsOpen ? 'bg-white/10 text-white' : 'text-slate-400'}`} title={t.viewportSettings}><Smartphone size={18} /></button>
                 {isSettingsOpen && (
@@ -1796,6 +1839,64 @@ const Studio: React.FC<StudioProps> = ({ games, onUpdateGame, onDeleteGame, onCr
                             </div>
                         </div>
                     )}
+                </div>
+            </div>
+        )}
+
+        {isEditInfoModalOpen && (
+            <div className="absolute inset-0 z-[200] bg-black/80 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-200">
+                <div className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden relative">
+                    <div className="animate-in slide-in-from-right-10 p-0 flex flex-col h-full bg-slate-900 overflow-y-auto">
+                        <div className="p-4 border-b border-white/10 flex justify-between items-center bg-black/20 shrink-0">
+                            <div className="flex items-center gap-2">
+                                <button onClick={() => setIsEditInfoModalOpen(false)} className="p-1 hover:bg-white/10 rounded-full text-slate-400 hover:text-white"><ChevronLeft size={18}/></button>
+                                <h3 className="font-bold text-white flex items-center gap-2"><PenTool size={16} className="text-pink-500"/> {t.editInfo}</h3>
+                            </div>
+                        </div>
+                        <div className="p-6 flex flex-col gap-6">
+                            <div>
+                                <label className="text-[10px] font-bold text-slate-500 uppercase mb-1.5 block">{t.gameTitle}</label>
+                                <input type="text" value={publishDraft.title ?? selectedProject.title} onChange={(e) => setPublishDraft(prev => ({ ...prev, title: e.target.value }))} maxLength={20} className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold text-white focus:border-pink-500 outline-none transition-colors" />
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-bold text-slate-500 uppercase mb-1.5 block">{t.versionLabel}</label>
+                                <div className="flex items-center gap-1 bg-black/40 border border-white/10 rounded-xl px-4 py-3">
+                                    <span className="text-sm font-bold text-slate-400">v</span>
+                                    <input type="text" value={publishDraft.versionLabel ?? selectedProject.versionLabel ?? '1.0'} onChange={(e) => setPublishDraft(prev => ({ ...prev, versionLabel: e.target.value }))} maxLength={15} className="w-full bg-transparent text-sm font-bold text-white focus:outline-none" placeholder="1.0" />
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-bold text-slate-500 uppercase mb-2 block">{t.coverArt}</label>
+                                <div className="flex gap-4">
+                                    <div className="relative w-24 h-24 rounded-xl border-2 border-dashed border-white/20 bg-black/40 overflow-hidden flex items-center justify-center shrink-0">
+                                        {(publishDraft.thumbnailUrl || selectedProject.thumbnailUrl) ? (<img src={publishDraft.thumbnailUrl || selectedProject.thumbnailUrl} className="w-full h-full object-cover" />) : (<div className="flex flex-col items-center justify-center text-slate-600"><ImageIcon size={24} className="mb-1"/><span className="text-[8px] uppercase font-bold">{t.noCover}</span></div>)}
+                                    </div>
+                                    <div className="flex-1 flex flex-col gap-2">
+                                        <div className="flex gap-1 bg-black/20 p-1 rounded-lg border border-white/5">
+                                            <button onClick={() => setCoverEditTab('ai')} className={`flex-1 py-1.5 rounded text-[10px] font-bold transition-all ${coverEditTab === 'ai' ? 'bg-pink-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}>{t.aiGen}</button>
+                                            <button onClick={() => setCoverEditTab('upload')} className={`flex-1 py-1.5 rounded text-[10px] font-bold transition-all ${coverEditTab === 'upload' ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400 hover:text-white'}`}>{t.upload}</button>
+                                        </div>
+                                        {coverEditTab === 'ai' ? (
+                                            <button onClick={handleAiCoverGen} disabled={isGeneratingCover} className="w-full h-10 bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-500 hover:to-purple-500 text-white rounded-lg flex items-center justify-center font-bold text-xs shadow-lg gap-2 transition-all active:scale-95 disabled:opacity-50">
+                                                {isGeneratingCover ? <Loader2 size={16} className="animate-spin"/> : <Sparkles size={16}/>}
+                                                {t.oneClickGen}
+                                            </button>
+                                        ) : (
+                                            <div onClick={() => coverFileInputRef.current?.click()} className="flex-1 border border-dashed border-white/10 rounded-lg flex items-center justify-center cursor-pointer hover:bg-white/5 text-[10px] text-slate-400 gap-2 h-10">
+                                                <Upload size={12}/> {t.upload}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label className="text-[10px] font-bold text-slate-500 uppercase mb-1.5 block">{t.description}</label>
+                                <textarea value={publishDraft.description ?? selectedProject.description} onChange={(e) => setPublishDraft(prev => ({ ...prev, description: e.target.value }))} maxLength={300} className="w-full h-24 bg-black/40 border border-white/10 rounded-xl p-3 text-xs text-slate-300 focus:border-pink-500 outline-none resize-none leading-relaxed" />
+                            </div>
+                            <button onClick={handleSaveGameInfo} className="w-full py-3 bg-white/10 hover:bg-white/20 text-white font-bold rounded-xl transition-all mt-auto shrink-0">{t.done}</button>
+                            <input type="file" ref={coverFileInputRef} className="hidden" accept="image/*" onChange={handleCoverUpload} />
+                        </div>
+                    </div>
                 </div>
             </div>
         )}

@@ -103,9 +103,9 @@ const CreationWizard: React.FC<CreationWizardProps> = ({ onGameCreated, language
   // Model Selection State
   const [selectedModel, setSelectedModel] = useState(() => {
       if (typeof window !== 'undefined') {
-          return localStorage.getItem('creation_wizard_model') || 'gemini-2.5-flash';
+          return localStorage.getItem('creation_wizard_model') || 'gemini-3-pro-preview';
       }
-      return 'gemini-2.5-flash';
+      return 'gemini-3-pro-preview';
   });
   const [isModelMenuOpen, setIsModelMenuOpen] = useState(false);
 

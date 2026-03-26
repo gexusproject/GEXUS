@@ -11,6 +11,8 @@ export default function App() {
   const [currentView, setCurrentView] = useState<'create' | 'studio'>('create');
   const [games, setGames] = useState<Game[]>([]);
   const [projectToLoad, setProjectToLoad] = useState<Game | null>(null);
+  const [dashboardTrigger, setDashboardTrigger] = useState(0);
+  const [activeProjectId, setActiveProjectId] = useState<string | null>(null);
   const [libraryAssets, setLibraryAssets] = useState<Asset[]>([]);
   
   const [isGenerating, setIsGenerating] = useState(false);
@@ -23,7 +25,7 @@ export default function App() {
 
   // Settings State
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [language, setLanguage] = useState<'en' | 'zh'>('zh');
+  const [language, setLanguage] = useState<'en' | 'zh'>('en');
   const [apiKey, setApiKey] = useState('');
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
@@ -222,13 +224,22 @@ export default function App() {
         </div>
 
         {/* New Project */}
-        <div className="px-3 mb-4 shrink-0">
+        <div className="px-3 mb-4 shrink-0 flex flex-col gap-2">
           <button 
             onClick={() => { setCurrentView('create'); setProjectToLoad(null); }}
             className={`flex items-center gap-3 rounded-full transition-all overflow-hidden ${isSidebarOpen ? 'px-4 py-2.5 w-full' : 'w-11 h-11 justify-center'} ${currentView === 'create' ? 'bg-purple-600/20 text-purple-300 hover:bg-purple-600/30' : 'bg-slate-800 hover:bg-slate-700 text-slate-200'}`}
           >
             <Plus size={20} className="shrink-0" />
             {isSidebarOpen && <span className="text-sm font-medium whitespace-nowrap">{language === 'zh' ? '新项目' : 'New Project'}</span>}
+          </button>
+          
+          <button 
+            onClick={() => { setCurrentView('studio'); setProjectToLoad(null); setDashboardTrigger(prev => prev + 1); }}
+            className={`flex items-center gap-3 rounded-full transition-all overflow-hidden ${isSidebarOpen ? 'px-4 py-2.5 w-full' : 'w-11 h-11 justify-center'} ${currentView === 'studio' && !activeProjectId ? 'bg-indigo-600/20 text-indigo-300 hover:bg-indigo-600/30' : 'bg-transparent hover:bg-white/5 text-slate-300'}`}
+            title={!isSidebarOpen ? (language === 'zh' ? '我的工作室' : 'My Studio') : undefined}
+          >
+            <Gamepad2 size={20} className="shrink-0" />
+            {isSidebarOpen && <span className="text-sm font-medium whitespace-nowrap">{language === 'zh' ? '我的工作室' : 'My Studio'}</span>}
           </button>
         </div>
 
@@ -239,7 +250,7 @@ export default function App() {
           )}
           <div className="flex flex-col gap-1">
             {games.map(game => {
-              const isActive = currentView === 'studio' && projectToLoad?.id === game.id;
+              const isActive = currentView === 'studio' && activeProjectId === game.id;
               return (
               <div key={game.id} className="relative group">
                 <button
@@ -349,6 +360,8 @@ export default function App() {
             onProjectLoaded={() => setProjectToLoad(null)}
             currentUser={{ id: 'local-user', handle: '@localdev', displayName: 'Local Dev', avatarUrl: '', coins: 9999, level: 1, isPro: true, joinedAt: Date.now(), email: 'dev@local' }}
             onBack={() => { setCurrentView('create'); setProjectToLoad(null); }}
+            dashboardTrigger={dashboardTrigger}
+            onProjectChange={setActiveProjectId}
           />
         )}
       </div>

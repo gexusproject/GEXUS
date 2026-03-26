@@ -44,7 +44,10 @@ Gexus is an innovative, Gemini-inspired web application that empowers users to g
 1. Open the app in your browser (usually `http://localhost:3000`).
 2. Click the **Settings** (⚙️) icon in the sidebar.
 3. Enter your **Gemini API Key** (Get one from [Google AI Studio](https://aistudio.google.com/)).
-4. Click **New Project** and describe your game idea!
+4. **Complete Game Development Workflow:**
+   * **Create New:** On the "New Project" screen, select an AI model (default is **Gemini 3.0 Pro**) -> Enter your game idea.
+   * **Auto-Transition:** Once the AI finishes generating, a new project is created and you are automatically redirected to the project's **Studio** interface.
+   * **Iterate in Studio:** In the Studio interface, select an AI model (default is **Gemini 3.0 Pro**) -> Directly enter your ideas in the **Director** tab to iterate on the game; read/edit the code in the **Code** tab -> Configure game assets and adjust parameters in the **Inspector** tab -> **Export** your game.
 
 ## 🛠️ Tech Stack
 *   **Frontend**: React, TypeScript, Vite
@@ -91,7 +94,10 @@ Gexus 是一款受 Gemini 界面启发的创新型 Web 应用，用户可以通�
 1. 在浏览器中打开应用 (通常为 `http://localhost:3000`)。
 2. 点击侧边栏的 **设置** (⚙️) 图标。
 3. 输入您的 **Gemini API Key** (可在 [Google AI Studio](https://aistudio.google.com/) 免费获取)。
-4. 点击 **新项目 (New Project)**，输入您的游戏创意，开始生成！
+4. **完整的游戏开发工作流：**
+   * 在 **Create New (创建新项目)** 界面选择 AI 模型（默认 **Gemini 3.0 Pro**） -> 输入您的想法。
+   * AI 生成完成后会自动创建新项目，并跳转至该项目的 **Studio (工作室)** 界面。
+   * 在 **Studio** 界面选择 AI 模型（默认 **Gemini 3.0 Pro**） -> 在 **导演 (Director)** 栏直接输入您的想法实现迭代；在 **代码 (Code)** 栏阅读/编辑代码 -> 在 **检查器 (Inspector)** 栏配置游戏素材/调整游戏参数 -> **导出 (Export)** 游戏。
 
 ## 📄 License
 This project is licensed under the MIT License.
