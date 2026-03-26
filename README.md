@@ -13,7 +13,7 @@ GEXUS (Local Version) is a game development tool integrated with generative AI (
 
 ## ✨ Features
 *   🤖 **AI-Powered Generation**: Transform your ideas into playable game prototypes using generative AI (with the model of your choice). Multi-modal support included.
-*   🎨 **Gemini-Style UI**: Clean, responsive dark-mode interface (`slate-950`) with a collapsible sidebar.
+*   🎨 **Streamlined UI**: Clean, responsive dark-mode interface (`slate-950`) with a collapsible sidebar.
 *   🛠️ **Studio Editor**: Minimalist operation. Iterate on gameplay using natural language; inspect and edit generated code; manage game assets and adjust parameters; assisted by Copilot.
 *   🌍 **Bilingual Support**: Fully supports English and Chinese (Simplified).
 *   🔑 **Bring Your Own Key (BYOK)**: Securely store your Gemini API key locally in the browser.
@@ -66,7 +66,7 @@ GEXUS（本地运行版）是一款集成生成型AI的游戏开发工具（使�
 
 ## ✨ 核心特性 (Features)
 *   🤖 **AI 驱动生成**: 使用生成型AI（模型由您选择），将您的想法转化为可玩的游戏原型。支持多模态。
-*   🎨 **Gemini 风格 UI**: 干净、响应式的深色模式界面，配备可折叠侧边栏，提供沉浸式体验。
+*   🎨 **极简风格 UI**: 干净、响应式的深色模式界面，配备可折叠侧边栏，提供沉浸式体验。
 *   🛠️ **Studio 工作室**: 极简主义操作。用自然语言迭代游戏玩法；检查和编辑生成的代码；管理游戏素材，调整参数；Copilot辅助开发。
 *   🌍 **双语支持**: 原生支持英文和简体中文。
 *   🔑 **自带 API Key (BYOK)**: 在浏览器本地安全地存储您的 Gemini API Key。
