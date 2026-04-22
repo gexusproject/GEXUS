@@ -1,4 +1,4 @@
-# 🎮 Gexus: AI Game Studio
+# 🎮 GEXUS: AI Game Studio
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![React](https://img.shields.io/badge/React-18-blue)
