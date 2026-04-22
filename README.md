@@ -5,7 +5,7 @@
 ![TypeScript](https://img.shields.io/badge/TypeScript-Ready-blue)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC)
 
-[English](#english) | [中文说明](#中文说明) | [DEMO体验](https://www.gexus.online/)
+[English](#english) | [中文说明](#中文说明) | [DEMO](https://www.gexus.online/)
 
 <a name="english"></a>
 ## 📖 Overview
